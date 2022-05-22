@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 function GetImportData()
 {
-    global $request, $session, $twig, $fin_ts, $accounts;
+    global $request, $session, $twig, $fin_ts, $accounts, $automate_without_js;
 
     $fin_ts = FinTsFactory::create_from_session($session);
 
@@ -52,7 +52,13 @@ function GetImportData()
         $session->set('transactions_to_import', serialize($transactions));
         $session->set('num_transactions_processed', 0);
         $session->set('import_messages', serialize(array()));
-        
+
+        if ($automate_without_js)
+        {
+            $session->set('persistedFints', $fin_ts->persist());
+            return $next_step;
+        }
+
         echo $twig->render(
             'show-transactions.twig',
             array(
