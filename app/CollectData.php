@@ -50,6 +50,7 @@ function CollectData()
         $session->set('firefly_account_id',      $configuration->firefly_account_id);
         $session->set('choose_account_from' ,    $configuration->choose_account_from);
         $session->set('choose_account_to',       $configuration->choose_account_to);
+        $session->set('use_non_batched_import',  $configuration->use_non_batched_import);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);

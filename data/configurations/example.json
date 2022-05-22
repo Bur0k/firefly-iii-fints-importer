@@ -7,6 +7,7 @@
   "firefly_url": "",
   "firefly_access_token": "",
   "skip_transaction_review": "false",
+  "use_non_batched_import": "false",
   "choose_account_automation":
   {
     "bank_account_iban": "",

@@ -16,6 +16,7 @@ class Configuration {
     public $firefly_account_id;
     public $choose_account_from;
     public $choose_account_to;
+    public $use_non_batched_import;
 }
 
 class ConfigurationFactory
@@ -34,6 +35,7 @@ class ConfigurationFactory
         $configuration->firefly_url             = $contentArray["firefly_url"];
         $configuration->firefly_access_token    = $contentArray["firefly_access_token"];
         $configuration->skip_transaction_review = filter_var($contentArray["skip_transaction_review"], FILTER_VALIDATE_BOOLEAN);
+        $configuration->use_non_batched_import  = isset($contentArray["use_non_batched_import"]) && $contentArray["use_non_batched_import"] == 'true';
         if (isset($contentArray["choose_account_automation"])) {
             $configuration->bank_account_iban       = $contentArray["choose_account_automation"]["bank_account_iban"];
             $configuration->firefly_account_id      = $contentArray["choose_account_automation"]["firefly_account_id"];

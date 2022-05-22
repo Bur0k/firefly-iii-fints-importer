@@ -40,20 +40,27 @@ function GetImportData()
     if ($soa_handler->needs_tan()) {
         $soa_handler->pose_and_render_tan_challenge();
     } else {
+        $next_step = Step::STEP5_RUN_IMPORT_BATCHED;
+        if ($session->get('use_non_batched_import', false))
+        {
+            $next_step = Step::STEP5_RUN_IMPORT;
+        }
+
         /** @var \Fhp\Model\StatementOfAccount\StatementOfAccount $soa */
         $soa          = $soa_handler->get_finished_action()->getStatement();
         $transactions = \App\StatementOfAccountHelper::get_all_transactions($soa);
+        $session->set('transactions_to_import', serialize($transactions));
+        $session->set('num_transactions_processed', 0);
+        $session->set('import_messages', serialize(array()));
+        
         echo $twig->render(
             'show-transactions.twig',
             array(
                 'transactions' => $transactions,
-                'next_step' => Step::STEP5_RUN_IMPORT,
+                'next_step' => $next_step,
                 'skip_transaction_review' => $session->get('skip_transaction_review')
             )
         );
-        $session->set('transactions_to_import', serialize($transactions));
-        $session->set('num_transactions_processed', 0);
-        $session->set('import_messages', serialize(array()));
     }
     $session->set('persistedFints', $fin_ts->persist());
     return Step::DONE;
