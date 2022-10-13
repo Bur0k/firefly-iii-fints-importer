@@ -29,10 +29,15 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
           push: true
-          tags: benkl/firefly-iii-fints-importer:latest
+          tags: bur0k/firefly-iii-fints-importer:latest
           
+<<<<<<< HEAD
       - uses: actions/checkout@v3
       - run: "sed -i 's/build: ./image: benkl\\/firefly-iii-fints-importer/g' docker-compose.yml"
+=======
+      - uses: actions/checkout@v2
+      - run: "sed -i 's/build: ./image: bur0k\\/firefly-iii-fints-importer/g' docker-compose.yml"
+>>>>>>> 75b4b68 (Update publish-docker-image.yml)
       - name: Start image
         run: docker-compose up -d
       - run: docker-compose ps | grep -q app
