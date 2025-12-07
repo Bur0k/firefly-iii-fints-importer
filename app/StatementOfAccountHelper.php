@@ -84,6 +84,19 @@ class StatementOfAccountHelper
                         $relatedParty = null;
                         $relatedParties = $detail->getRelatedParties();
 
+                        // Debug: log all related parties
+                        if (count($relatedParties) > 0) {
+                            $partyInfo = [];
+                            foreach ($relatedParties as $idx => $p) {
+                                $pType = $p->getRelatedPartyType();
+                                $pTypeName = get_class($pType);
+                                $pName = $pType->getName() ?? 'unknown';
+                                $pIban = $p->getAccount() ? $p->getAccount()->getIdentification() : 'no-account';
+                                $partyInfo[] = "[$idx] $pTypeName: $pName ($pIban)";
+                            }
+                            error_log("CAMT parties ($cdIndicator): " . implode(', ', $partyInfo));
+                        }
+
                         if (count($relatedParties) > 1) {
                             // Multiple parties - select based on transaction direction
                             foreach ($relatedParties as $party) {
