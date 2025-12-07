@@ -58,6 +58,9 @@ class TransactionsToFireflySender
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
 
+        // Debug: log counterparty IBAN for transfer detection
+        error_log("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
+
         $firefly_accounts->rewind();
         for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
             // Match counterparty IBAN, but exclude the source account to avoid source=destination
@@ -67,7 +70,7 @@ class TransactionsToFireflySender
             $firefly_accounts->next();
         }
         if ($firefly_accounts->valid()) {
-            //echo "found account {$acc->name} with id {$acc->id} matching IBAN {$acc->iban}\n";
+            error_log("Transfer detected: matched account {$acc->name} (ID: {$acc->id}) with IBAN {$acc->iban}");
             $destination = array('id' => $acc->id);
             $type = TransactionType::TRANSFER;
 
@@ -75,7 +78,7 @@ class TransactionsToFireflySender
                 [$source, $destination] = [$destination, $source];
             }
         } else {
-            //echo "no account found matching IBAN {$destination['iban']}\n";
+            error_log("No transfer match found - treating as " . ($debitOrCredit !== Transaction::CD_CREDIT ? "withdrawal" : "deposit"));
             if ($debitOrCredit !== Transaction::CD_CREDIT) {
                 $type = TransactionType::WITHDRAWAL;
             } else {
