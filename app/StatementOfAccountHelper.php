@@ -135,7 +135,7 @@ class StatementOfAccountHelper
                         // Try to get unstructured remittance info blocks as fallback
                         $unstructuredBlocks = $detail->getRemittanceInformation()->getUnstructuredBlocks();
                         if (!empty($unstructuredBlocks)) {
-                            $description1 = (string) $unstructuredBlocks[0];
+                            $description1 = $unstructuredBlocks[0]->getMessage();
                         }
                     }
                     if (empty($description1) && $additionalInfo) {
