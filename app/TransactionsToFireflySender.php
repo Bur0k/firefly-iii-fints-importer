@@ -53,7 +53,8 @@ class TransactionsToFireflySender
     )
     {
         $debitOrCredit = $transaction->getCreditDebit();
-        $amount        = $transaction->getAmount();
+        // Firefly III expects positive amounts - the transaction type indicates direction
+        $amount        = abs($transaction->getAmount());
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
 
