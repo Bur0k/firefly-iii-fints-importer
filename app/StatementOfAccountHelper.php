@@ -5,6 +5,7 @@ namespace App;
 use Fhp\Model\StatementOfAccount\Transaction;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
+use Money\Currencies\ISOCurrencies;
 
 class StatementOfAccountHelper
 {
@@ -64,7 +65,10 @@ class StatementOfAccountHelper
 
                     // Set amount (convert Money object to float)
                     $amount = $entry->getAmount();
-                    $transaction->setAmount((float)($amount->getAmount() / (10 ** $amount->getCurrency()->getDefaultFractionDigits())));
+                    // Get currency subunit (decimal places) from ISO currencies
+                    $currencies = new ISOCurrencies();
+                    $fractionDigits = $currencies->subunitFor($amount->getCurrency());
+                    $transaction->setAmount((float)($amount->getAmount() / (10 ** $fractionDigits)));
 
                     // Get transaction details (first detail if multiple exist)
                     $detail = $entry->getTransactionDetail();

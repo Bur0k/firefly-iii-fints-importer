@@ -55,8 +55,10 @@ function GetImportData()
         $camt_xml = $camt_xml_array[0] ?? '';
 
         if (empty(trim($camt_xml))) {
+            $date_from = $request->request->get('date_from', 'unknown');
+            $date_to = $request->request->get('date_to', 'unknown');
             error_log("WARNING: No CAMT XML data returned from bank. " .
-                      "Date range: " . $from->format('Y-m-d') . " to " . $to->format('Y-m-d'));
+                      "Date range: " . $date_from . " to " . $date_to);
             // Return empty transactions - user will see "no transactions" instead of crash
             $transactions = [];
         } else {
