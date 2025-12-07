@@ -4,6 +4,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Log deprecation warnings that would otherwise only flash on screen
+set_error_handler(function ($severity, $message, $file, $line) {
+    if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+        error_log("DEPRECATION: $message in $file on line $line");
+    }
+    // Return false to let PHP's default error handler run as well
+    return false;
+});
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 include 'Setup.php';
