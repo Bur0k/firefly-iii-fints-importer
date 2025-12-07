@@ -84,19 +84,6 @@ class StatementOfAccountHelper
                         $relatedParty = null;
                         $relatedParties = $detail->getRelatedParties();
 
-                        // Debug: log all related parties
-                        if (count($relatedParties) > 0) {
-                            $partyInfo = [];
-                            foreach ($relatedParties as $idx => $p) {
-                                $pType = $p->getRelatedPartyType();
-                                $pTypeName = get_class($pType);
-                                $pName = $pType->getName() ?? 'unknown';
-                                $pIban = $p->getAccount() ? $p->getAccount()->getIdentification() : 'no-account';
-                                $partyInfo[] = "[$idx] $pTypeName: $pName ($pIban)";
-                            }
-                            error_log("CAMT parties ($cdIndicator): " . implode(', ', $partyInfo));
-                        }
-
                         if (count($relatedParties) > 1) {
                             // Multiple parties - select based on transaction direction
                             foreach ($relatedParties as $party) {
@@ -129,6 +116,20 @@ class StatementOfAccountHelper
                             $name = $partyType->getName();
                             if ($name) {
                                 $transaction->setName($name);
+                            }
+                        }
+
+                        // Handle single-party transactions where bank only provides one party (yourself)
+                        // In these cases, keep the IBAN as-is - transfer detection will handle it
+                        // by excluding the source account from matching (preventing source=destination error)
+                        if (count($relatedParties) === 1) {
+                            $singleParty = $relatedParties[0];
+                            $singlePartyType = $singleParty->getRelatedPartyType();
+
+                            if ($cdIndicator === 'DBIT' && $singlePartyType instanceof \Genkgo\Camt\DTO\Debtor) {
+                                error_log("Note: DBIT transaction with only Debtor (self) - will be treated as withdrawal");
+                            } elseif ($cdIndicator === 'CRDT' && $singlePartyType instanceof \Genkgo\Camt\DTO\Creditor) {
+                                error_log("Note: CRDT transaction with only Creditor (self) - will be treated as deposit");
                             }
                         }
 
