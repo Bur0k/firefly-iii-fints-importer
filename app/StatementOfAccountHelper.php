@@ -79,23 +79,37 @@ class StatementOfAccountHelper
                             }
                         }
 
-                        // Set remittance information (description)
+                        // Set remittance information and end-to-end ID via structured description
+                        $structuredDesc = [];
+
                         $remittanceInfo = $detail->getRemittanceInformation();
                         if ($remittanceInfo) {
                             $message = $remittanceInfo->getMessage();
                             if ($message) {
-                                $transaction->setMainDescription($message);
-                                $transaction->setStructuredDescription(['SVWZ' => $message]);
+                                $structuredDesc['SVWZ'] = $message;
                             }
                         }
 
-                        // Set end-to-end ID (SEPA reference)
+                        // Set end-to-end ID (SEPA reference) - stored in EREF key
                         $reference = $detail->getReference();
                         if ($reference) {
                             $endToEndId = $reference->getEndToEndId();
                             if ($endToEndId) {
-                                $transaction->setEndToEndID($endToEndId);
+                                $structuredDesc['EREF'] = $endToEndId;
                             }
+                        }
+
+                        // Set ABWA field (used for notes in Firefly III) - use counterparty name as fallback
+                        if ($relatedParty && $relatedParty->getRelatedPartyType()) {
+                            $partyName = $relatedParty->getRelatedPartyType()->getName();
+                            if ($partyName) {
+                                $structuredDesc['ABWA'] = $partyName;
+                            }
+                        }
+
+                        // Set structured description (used by getMainDescription and getEndToEndID)
+                        if (!empty($structuredDesc)) {
+                            $transaction->setStructuredDescription($structuredDesc);
                         }
                     }
 
@@ -103,6 +117,22 @@ class StatementOfAccountHelper
                     $additionalInfo = $entry->getAdditionalInfo();
                     if ($additionalInfo) {
                         $transaction->setBookingText($additionalInfo);
+                    }
+
+                    // Set description1 as additional fallback (use counterparty name or additional info)
+                    $description1 = '';
+                    if ($detail && $detail->getRemittanceInformation()) {
+                        // Try to get unstructured remittance info blocks as fallback
+                        $unstructuredBlocks = $detail->getRemittanceInformation()->getUnstructuredBlocks();
+                        if (!empty($unstructuredBlocks)) {
+                            $description1 = (string) $unstructuredBlocks[0];
+                        }
+                    }
+                    if (empty($description1) && $additionalInfo) {
+                        $description1 = $additionalInfo;
+                    }
+                    if (!empty($description1)) {
+                        $transaction->setDescription1($description1);
                     }
 
                     $transactions[] = $transaction;
