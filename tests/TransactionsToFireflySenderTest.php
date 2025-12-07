@@ -28,6 +28,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'iban'          => null,
                     'account_number'=> null,
                     'bic'           => null,
+                    'current_balance' => '0',
+                    'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
             )),
             1 => array(
@@ -38,6 +40,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'iban'          => 'DE93500105176891219573',
                     'account_number'=> '123456789',
                     'bic'           => 'BIC123',
+                    'current_balance' => '0',
+                    'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
             )),
             2 => array(
@@ -48,6 +52,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'iban'          => $this->transfer_iban,
                     'account_number'=> '123456789',
                     'bic'           => 'BIC123',
+                    'current_balance' => '0',
+                    'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
             )),
     ));
