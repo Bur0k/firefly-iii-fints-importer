@@ -78,8 +78,34 @@ class StatementOfAccountHelper
                     $detail = $entry->getTransactionDetail();
 
                     if ($detail) {
+                        // Find the correct counterparty based on credit/debit direction
+                        // For credits (incoming): counterparty is Debtor (who sent money)
+                        // For debits (outgoing): counterparty is Creditor (who received money)
+                        $relatedParty = null;
+                        $relatedParties = $detail->getRelatedParties();
+
+                        if (count($relatedParties) > 1) {
+                            // Multiple parties - select based on transaction direction
+                            foreach ($relatedParties as $party) {
+                                $partyType = $party->getRelatedPartyType();
+                                if ($cdIndicator === 'CRDT' && $partyType instanceof \Genkgo\Camt\DTO\Debtor) {
+                                    // For credits, use the Debtor (sender)
+                                    $relatedParty = $party;
+                                    break;
+                                } elseif ($cdIndicator === 'DBIT' && $partyType instanceof \Genkgo\Camt\DTO\Creditor) {
+                                    // For debits, use the Creditor (recipient)
+                                    $relatedParty = $party;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Fallback to first party if no specific match found
+                        if (!$relatedParty && !empty($relatedParties)) {
+                            $relatedParty = $relatedParties[0];
+                        }
+
                         // Set counterparty account number (IBAN)
-                        $relatedParty = $detail->getRelatedParty();
                         if ($relatedParty && $relatedParty->getAccount()) {
                             $transaction->setAccountNumber($relatedParty->getAccount()->getIdentification());
                         }
