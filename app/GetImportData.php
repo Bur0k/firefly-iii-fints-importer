@@ -26,7 +26,7 @@ function GetImportData()
             $from         = new \DateTime($request->request->get('date_from'));
             $to           = new \DateTime($request->request->get('date_to'));
             $session->set('firefly_account', $request->request->get('firefly_account'));
-            $get_statement = \Fhp\Action\GetStatementOfAccount::create($bank_account, $from, $to);
+            $get_statement = \Fhp\Action\GetStatementOfAccountXML::create($bank_account, $from, $to);
             $fin_ts->execute($get_statement);
             return $get_statement;
         },
@@ -42,9 +42,11 @@ function GetImportData()
     } else {
         $next_step = Step::STEP5_RUN_IMPORT_BATCHED;
 
-        /** @var \Fhp\Model\StatementOfAccount\StatementOfAccount $soa */
-        $soa          = $soa_handler->get_finished_action()->getStatement();
-        $transactions = \App\StatementOfAccountHelper::get_all_transactions($soa);
+        // Get CAMT XML from the action and parse it
+        $camt_xml_array = $soa_handler->get_finished_action()->getBookedXML();
+        // GetStatementOfAccountXML returns an array of XML strings, we process the first one
+        $camt_xml = $camt_xml_array[0] ?? '';
+        $transactions = \App\StatementOfAccountHelper::parse_camt_xml($camt_xml);
         $session->set('transactions_to_import', serialize($transactions));
         $session->set('num_transactions_processed', 0);
         $session->set('import_messages', serialize(array()));
