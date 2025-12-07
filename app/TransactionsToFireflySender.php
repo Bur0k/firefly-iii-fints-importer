@@ -60,7 +60,8 @@ class TransactionsToFireflySender
 
         $firefly_accounts->rewind();
         for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
-            if ($destination['iban'] !== null && $acc->iban == $destination['iban']) {
+            // Match counterparty IBAN, but exclude the source account to avoid source=destination
+            if ($destination['iban'] !== null && $acc->iban == $destination['iban'] && $acc->id != $firefly_account_id) {
                 break;
             }
             $firefly_accounts->next();
