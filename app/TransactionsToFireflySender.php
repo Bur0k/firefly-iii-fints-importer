@@ -100,6 +100,10 @@ class TransactionsToFireflySender
             throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
         }
 
+        // Get currency code from structured description (set by CAMT parser)
+        $structuredDesc = $transaction->getStructuredDescription();
+        $currencyCode = $structuredDesc['CURR'] ?? null;
+
         return array(
             'apply_rules' => true,
             'error_if_duplicate_hash' => true,
@@ -109,6 +113,7 @@ class TransactionsToFireflySender
                     'date' => $transaction->getValutaDate()->format('Y-m-d'),
                     'amount' => $amount,
                     'description' => $description,
+                    'currency_code' => $currencyCode,
                     'source_name' => $source['name'] ?? null,
                     'source_id' => $source['id'] ?? null,
                     'source_iban' => $source['iban'] ?? null,
@@ -116,7 +121,7 @@ class TransactionsToFireflySender
                     'destination_id' => $destination['id'] ?? null,
                     'destination_iban' => $destination['iban'] ?? null,
                     'sepa_ct_id' => $transaction->getEndToEndID() ?? null,
-                    'notes' => $transaction->getStructuredDescription()['ABWA'] ?? $destination['name'] ?? null,
+                    'notes' => $structuredDesc['ABWA'] ?? $destination['name'] ?? null,
                 )
             )
         );

@@ -67,8 +67,12 @@ class StatementOfAccountHelper
                     $amount = $entry->getAmount();
                     // Get currency subunit (decimal places) from ISO currencies
                     $currencies = new ISOCurrencies();
-                    $fractionDigits = $currencies->subunitFor($amount->getCurrency());
+                    $currency = $amount->getCurrency();
+                    $fractionDigits = $currencies->subunitFor($currency);
                     $transaction->setAmount((float)($amount->getAmount() / (10 ** $fractionDigits)));
+
+                    // Store currency code for later use (will be added to structuredDescription)
+                    $currencyCode = $currency->getCode();
 
                     // Get transaction details (first detail if multiple exist)
                     $detail = $entry->getTransactionDetail();
@@ -122,6 +126,11 @@ class StatementOfAccountHelper
                             $transaction->setStructuredDescription($structuredDesc);
                         }
                     }
+
+                    // Add currency code to structured description (always set, even without detail)
+                    $existingDesc = $transaction->getStructuredDescription() ?? [];
+                    $existingDesc['CURR'] = $currencyCode;
+                    $transaction->setStructuredDescription($existingDesc);
 
                     // Set booking text from entry-level additional info
                     $additionalInfo = $entry->getAdditionalInfo();
