@@ -23,6 +23,12 @@ class StatementOfAccountHelper
      * @return Transaction[]
      */
     public static function parse_camt_xml(string $xml): array {
+        // Validate XML input
+        if (empty(trim($xml))) {
+            error_log("CAMT XML parsing skipped: Empty XML provided");
+            return [];
+        }
+
         try {
             // Initialize CAMT reader with default configuration
             $reader = new Reader(Config::getDefault());
@@ -141,7 +147,7 @@ class StatementOfAccountHelper
 
             return $transactions;
 
-        } catch (\Exception $e) {
+        } catch (\Exception | \Error $e) {
             // Log the error and return empty array to prevent fatal errors
             error_log("CAMT XML parsing failed: " . $e->getMessage());
             return [];

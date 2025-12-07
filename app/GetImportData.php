@@ -44,9 +44,24 @@ function GetImportData()
 
         // Get CAMT XML from the action and parse it
         $camt_xml_array = $soa_handler->get_finished_action()->getBookedXML();
+
+        // Debug logging to help diagnose issues
+        error_log("CAMT XML array count: " . count($camt_xml_array));
+        if (!empty($camt_xml_array) && isset($camt_xml_array[0])) {
+            error_log("First CAMT XML length: " . strlen($camt_xml_array[0]));
+        }
+
         // GetStatementOfAccountXML returns an array of XML strings, we process the first one
         $camt_xml = $camt_xml_array[0] ?? '';
-        $transactions = \App\StatementOfAccountHelper::parse_camt_xml($camt_xml);
+
+        if (empty(trim($camt_xml))) {
+            error_log("WARNING: No CAMT XML data returned from bank. " .
+                      "Date range: " . $from->format('Y-m-d') . " to " . $to->format('Y-m-d'));
+            // Return empty transactions - user will see "no transactions" instead of crash
+            $transactions = [];
+        } else {
+            $transactions = \App\StatementOfAccountHelper::parse_camt_xml($camt_xml);
+        }
         $session->set('transactions_to_import', serialize($transactions));
         $session->set('num_transactions_processed', 0);
         $session->set('import_messages', serialize(array()));
