@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Logger;
 use Fhp\Model\StatementOfAccount\Transaction;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
@@ -26,7 +27,7 @@ class StatementOfAccountHelper
     public static function parse_camt_xml(string $xml): array {
         // Validate XML input
         if (empty(trim($xml))) {
-            error_log("CAMT XML parsing skipped: Empty XML provided");
+            Logger::info("CAMT XML parsing skipped: Empty XML provided");
             return [];
         }
 
@@ -127,9 +128,9 @@ class StatementOfAccountHelper
                             $singlePartyType = $singleParty->getRelatedPartyType();
 
                             if ($cdIndicator === 'DBIT' && $singlePartyType instanceof \Genkgo\Camt\DTO\Debtor) {
-                                error_log("Note: DBIT transaction with only Debtor (self) - will be treated as withdrawal");
+                                Logger::trace("DBIT transaction with only Debtor (self) - will be treated as withdrawal");
                             } elseif ($cdIndicator === 'CRDT' && $singlePartyType instanceof \Genkgo\Camt\DTO\Creditor) {
-                                error_log("Note: CRDT transaction with only Creditor (self) - will be treated as deposit");
+                                Logger::trace("CRDT transaction with only Creditor (self) - will be treated as deposit");
                             }
                         }
 
@@ -202,7 +203,7 @@ class StatementOfAccountHelper
 
         } catch (\Exception | \Error $e) {
             // Log the error and return empty array to prevent fatal errors
-            error_log("CAMT XML parsing failed: " . $e->getMessage());
+            Logger::error("CAMT XML parsing failed: " . $e->getMessage());
             return [];
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Logger;
 use Fhp\Model\StatementOfAccount\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionType;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
@@ -58,8 +59,7 @@ class TransactionsToFireflySender
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
 
-        // Debug: log counterparty IBAN for transfer detection
-        error_log("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
+        Logger::trace("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
 
         $firefly_accounts->rewind();
         for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
@@ -70,7 +70,7 @@ class TransactionsToFireflySender
             $firefly_accounts->next();
         }
         if ($firefly_accounts->valid()) {
-            error_log("Transfer detected: matched account {$acc->name} (ID: {$acc->id}) with IBAN {$acc->iban}");
+            Logger::trace("Transfer detected: matched account {$acc->name} (ID: {$acc->id}) with IBAN {$acc->iban}");
             $destination = array('id' => $acc->id);
             $type = TransactionType::TRANSFER;
 
@@ -78,7 +78,7 @@ class TransactionsToFireflySender
                 [$source, $destination] = [$destination, $source];
             }
         } else {
-            error_log("No transfer match found - treating as " . ($debitOrCredit !== Transaction::CD_CREDIT ? "withdrawal" : "deposit"));
+            Logger::trace("No transfer match found - treating as " . ($debitOrCredit !== Transaction::CD_CREDIT ? "withdrawal" : "deposit"));
             if ($debitOrCredit !== Transaction::CD_CREDIT) {
                 $type = TransactionType::WITHDRAWAL;
             } else {

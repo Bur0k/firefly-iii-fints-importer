@@ -2,6 +2,7 @@
 namespace App\StepFunction;
 
 use App\FinTsFactory;
+use App\Logger;
 use App\Step;
 use App\TanHandler;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,10 +46,9 @@ function GetImportData()
         // Get CAMT XML from the action and parse it
         $camt_xml_array = $soa_handler->get_finished_action()->getBookedXML();
 
-        // Debug logging to help diagnose issues
-        error_log("CAMT XML array count: " . count($camt_xml_array));
+        Logger::trace("CAMT XML array count: " . count($camt_xml_array));
         if (!empty($camt_xml_array) && isset($camt_xml_array[0])) {
-            error_log("First CAMT XML length: " . strlen($camt_xml_array[0]));
+            Logger::trace("First CAMT XML length: " . strlen($camt_xml_array[0]));
         }
 
         // GetStatementOfAccountXML returns an array of XML strings, we process the first one
@@ -57,8 +57,8 @@ function GetImportData()
         if (empty(trim($camt_xml))) {
             $date_from = $request->request->get('date_from', 'unknown');
             $date_to = $request->request->get('date_to', 'unknown');
-            error_log("WARNING: No CAMT XML data returned from bank. " .
-                      "Date range: " . $date_from . " to " . $date_to);
+            Logger::warn("No CAMT XML data returned from bank. " .
+                         "Date range: " . $date_from . " to " . $date_to);
             // Return empty transactions - user will see "no transactions" instead of crash
             $transactions = [];
         } else {
