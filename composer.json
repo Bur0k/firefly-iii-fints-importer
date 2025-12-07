@@ -1,5 +1,6 @@
 {
   "require": {
+    "php": "^8.4",
     "nemiah/php-fints": "dev-master",
     "twig/twig": "^3.0",
     "symfony/http-foundation": "^5.0",
