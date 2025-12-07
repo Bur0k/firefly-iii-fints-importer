@@ -8,7 +8,7 @@
     "firefly-iii/api-support-classes": "dev-main",
     "phpseclib/bcmath_compat": "*",
     "ext-json": "*",
-    "globalcitizen/php-iban": "^2.7",
+    "globalcitizen/php-iban": "^4.2",
     "genkgo/camt": "^2.0"
   },
   "autoload": {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3a67e7348e3eb69714e89bda6e233781",
+    "content-hash": "fb82a54c8950206b78752e72f0e7859a",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -318,17 +318,20 @@
         },
         {
             "name": "globalcitizen/php-iban",
-            "version": "v2.7.5",
+            "version": "v4.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/globalcitizen/php-iban.git",
-                "reference": "4c0fc54877948ac667c0ab29c2d1afbe47705599"
+                "reference": "d8d2b7c60ba01286fc625763618760aa3b684c00"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/globalcitizen/php-iban/zipball/4c0fc54877948ac667c0ab29c2d1afbe47705599",
-                "reference": "4c0fc54877948ac667c0ab29c2d1afbe47705599",
+                "url": "https://api.github.com/repos/globalcitizen/php-iban/zipball/d8d2b7c60ba01286fc625763618760aa3b684c00",
+                "reference": "d8d2b7c60ba01286fc625763618760aa3b684c00",
                 "shasum": ""
+            },
+            "require": {
+                "php": "^5.4 || ^5.5 || ^5.6 || ^7.0 || ^7.4 || ^8.0 || ^8.1"
             },
             "type": "library",
             "autoload": {
@@ -344,9 +347,9 @@
             "description": "php-iban is a library for parsing and validating IBAN (and IIBAN) bank account information.",
             "support": {
                 "issues": "https://github.com/globalcitizen/php-iban/issues",
-                "source": "https://github.com/globalcitizen/php-iban/tree/v2.7.5"
+                "source": "https://github.com/globalcitizen/php-iban/tree/v4.2.3"
             },
-            "time": "2020-05-03T19:46:35+00:00"
+            "time": "2024-03-25T00:37:02+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

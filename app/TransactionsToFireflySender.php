@@ -37,7 +37,7 @@ class TransactionsToFireflySender
 
     public static function get_iban(Transaction $transaction)
     {
-        $iban_helper = new \IBAN;
+        $iban_helper = new \PHP_IBAN\IBAN;
         if ($iban_helper->Verify($transaction->getAccountNumber())) {
             return $transaction->getAccountNumber();
         } else {
