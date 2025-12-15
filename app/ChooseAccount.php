@@ -2,6 +2,7 @@
 namespace App\StepFunction;
 
 use App\FinTsFactory;
+use App\Logger;
 use App\Step;
 use App\TanHandler;
 use Symfony\Component\HttpFoundation\Request;
@@ -93,6 +94,26 @@ function ChooseAccount()
 
         if (empty($error)) {
             $session->set('accounts', serialize($bank_accounts));
+
+            // Detect supported statement formats from BPD
+            $bpd = $fin_ts->getBpd();
+            $supports_camt = $bpd->getLatestSupportedParameters('HICAZS') !== null;
+            $supports_mt940 = $bpd->getLatestSupportedParameters('HIKAZS') !== null;
+
+            if ($supports_camt) {
+                $session->set('statement_format', 'camt');
+                Logger::info("Bank supports CAMT XML format (HICAZS)");
+            } elseif ($supports_mt940) {
+                $session->set('statement_format', 'mt940');
+                Logger::info("Bank supports MT940 format (HIKAZS)");
+            } else {
+                $error = "Your bank does not support any statement format implemented in this application.\n";
+                $error .= "Supported formats: CAMT XML (HICAZS), MT940 (HIKAZS)";
+                Logger::error("Bank supports neither CAMT nor MT940 format");
+            }
+        }
+
+        if (empty($error)) {
             if ($can_be_automated && $automate_without_js)
             {
                 $request->request->set('bank_account', $requested_bank_index);
