@@ -2,6 +2,7 @@
 namespace App\StepFunction;
 
 use App\FinTsFactory;
+use App\Logger;
 use App\Step;
 use App\TanHandler;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,6 +36,22 @@ function Login()
     if ($login_handler->needs_tan()) {
         $login_handler->pose_and_render_tan_challenge();
     } else {
+        // Detect supported statement formats from BPD (now safely cached after login)
+        $bpd = $fin_ts->getBpd();
+        $supports_camt = $bpd->getLatestSupportedParameters('HICAZS') !== null;
+        $supports_mt940 = $bpd->getLatestSupportedParameters('HIKAZS') !== null;
+
+        if ($supports_camt) {
+            $session->set('statement_format', 'camt');
+            Logger::info("Bank supports CAMT XML format (HICAZS)");
+        } elseif ($supports_mt940) {
+            $session->set('statement_format', 'mt940');
+            Logger::info("Bank supports MT940 format (HIKAZS)");
+        } else {
+            Logger::warning("Bank supports neither CAMT nor MT940 - will attempt CAMT first");
+            $session->set('statement_format', 'camt'); // Default, let exception handling deal with it
+        }
+
         if ($automate_without_js)
         {
             $session->set('persistedFints', $fin_ts->persist());
