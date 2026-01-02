@@ -84,6 +84,10 @@ Warnings
 -------
 * Note that most banks handle failed FinTS logins similar to failed website logins. Thus, if you fail to enter your password correctly 3 times in a row, your access will most likely be blocked. Then you need to take some bank specific actions to reenable your FinTS & web access.
 * For ING DiBa: According to [this wiki](https://www.willuhn.de/wiki/doku.php?id=psd2#ing), a login into the website is required every 90 days.
+* Please be aware: In January 2026 the importer was updated. 
+  Depending on your bank, transactions might now be imported in a slightly different format.
+  This may interfere with Firefly's duplicate detection and can lead to duplicate transactions in Firefly, if you have already imported transactions before the update.
+    
 
 
 Bank specifics
