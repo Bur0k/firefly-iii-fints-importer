@@ -31,7 +31,7 @@
         <div class="card">
             <div class="card-header">
                 <strong>
-                    {% if transaction.getCreditDebit == 'debit' %}-{% endif %}{{ transaction.getAmount()|abs }}&euro;
+                    {% if transaction.getCreditDebit == 'debit' %}-{% endif %}{{ transaction.getAmount() }}&euro;
                 </strong>
                 {% if transaction.getCreditDebit == 'debit' %}to{% else %}from{% endif %}
                 {{ transaction.getName() }}

@@ -64,13 +64,13 @@ class StatementOfAccountHelper
                         $transaction->setValutaDate(\DateTime::createFromImmutable($bookingDate));
                     }
 
-                    // Set amount (convert Money object to float)
+                    // Set amount (convert Money object to absolute float, direction is in credit_debit field)
                     $amount = $entry->getAmount();
                     // Get currency subunit (decimal places) from ISO currencies
                     $currencies = new ISOCurrencies();
                     $currency = $amount->getCurrency();
                     $fractionDigits = $currencies->subunitFor($currency);
-                    $transaction->setAmount((float)($amount->getAmount() / (10 ** $fractionDigits)));
+                    $transaction->setAmount(abs((float)($amount->getAmount() / (10 ** $fractionDigits))));
 
                     // Store currency code for later use (will be added to structuredDescription)
                     $currencyCode = $currency->getCode();

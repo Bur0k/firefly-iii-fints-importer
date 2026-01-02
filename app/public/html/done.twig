@@ -27,7 +27,7 @@
                 <div class="card">
                     <div class="card-header">
                         <strong>
-                            {% if message.transaction.getCreditDebit == 'debit' %}-{% endif %}{{ message.transaction.getAmount()|abs }}&euro;
+                            {% if message.transaction.getCreditDebit == 'debit' %}-{% endif %}{{ message.transaction.getAmount() }}&euro;
                         </strong>
                         {% if message.transaction.getCreditDebit == 'debit' %}to{% else %}from{% endif %}
                         {{ message.transaction.getName() }}
