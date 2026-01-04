@@ -98,6 +98,8 @@ function GetImportData()
             $session->set('num_transactions_processed', 0);
             $session->set('import_messages', serialize(array()));
 
+            $fin_ts->close();
+
             if ($automate_without_js) {
                 $session->set('persistedFints', $fin_ts->persist());
                 return $next_step;
@@ -146,7 +148,6 @@ function GetImportData()
         }
     }
 
-    $fin_ts->close();
     $session->set('persistedFints', $fin_ts->persist());
     return Step::DONE;
 }
