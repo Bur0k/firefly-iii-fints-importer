@@ -1,11 +1,12 @@
-FROM php:8.1-alpine3.14
+FROM php:8.4-alpine
 
-RUN apk add composer git
-
+RUN apk add --no-cache git libxml2-dev
 COPY . .
 
 RUN rm -f /data/configurations/*
 
+RUN docker-php-ext-install xml dom && \
+     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev
 RUN composer clearcache
 

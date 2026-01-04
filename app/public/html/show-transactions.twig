@@ -14,6 +14,12 @@
     
     <p>The following transactions will be imported to Firefly III.</p>
 
+    <p>
+        Please be aware: In January 2026 the importer was updated.
+        Depending on your bank, transactions might now be imported in a slightly different format.
+        This may interfere with Firefly's duplicate detection and can lead to duplicate transactions in Firefly, if you have already imported transactions before the update.
+    </p>
+
     <form name="next-form" action="." method="post">
         <input type="hidden" name="step" value="{{ next_step }}">
         <button type="submit" class="btn btn-primary">Import transactions to FireflyIII</button>

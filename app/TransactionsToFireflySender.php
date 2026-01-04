@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Logger;
 use Fhp\Model\StatementOfAccount\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionType;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
@@ -37,7 +38,7 @@ class TransactionsToFireflySender
 
     public static function get_iban(Transaction $transaction)
     {
-        $iban_helper = new \IBAN;
+        $iban_helper = new \PHP_IBAN\IBAN;
         if ($iban_helper->Verify($transaction->getAccountNumber())) {
             return $transaction->getAccountNumber();
         } else {
@@ -57,15 +58,18 @@ class TransactionsToFireflySender
         $source        = array('id' => $firefly_account_id);
         $destination   = array('iban' => self::get_iban($transaction), 'name' => $transaction->getName());
 
+        Logger::trace("Transfer detection - counterparty IBAN: " . ($destination['iban'] ?? 'null') . ", name: " . ($destination['name'] ?? 'null') . ", source account ID: $firefly_account_id");
+
         $firefly_accounts->rewind();
         for ($acc = $firefly_accounts->current(); $firefly_accounts->valid(); $acc = $firefly_accounts->current()) {
-            if ($destination['iban'] !== null && $acc->iban == $destination['iban']) {
+            // Match counterparty IBAN, but exclude the source account to avoid source=destination
+            if ($destination['iban'] !== null && $acc->iban == $destination['iban'] && $acc->id != $firefly_account_id) {
                 break;
             }
             $firefly_accounts->next();
         }
         if ($firefly_accounts->valid()) {
-            //echo "found account {$acc->name} with id {$acc->id} matching IBAN {$acc->iban}\n";
+            Logger::trace("Transfer detected: matched account {$acc->name} (ID: {$acc->id}) with IBAN {$acc->iban}");
             $destination = array('id' => $acc->id);
             $type = TransactionType::TRANSFER;
 
@@ -73,7 +77,7 @@ class TransactionsToFireflySender
                 [$source, $destination] = [$destination, $source];
             }
         } else {
-            //echo "no account found matching IBAN {$destination['iban']}\n";
+            Logger::trace("No transfer match found - treating as " . ($debitOrCredit !== Transaction::CD_CREDIT ? "withdrawal" : "deposit"));
             if ($debitOrCredit !== Transaction::CD_CREDIT) {
                 $type = TransactionType::WITHDRAWAL;
             } else {
@@ -100,25 +104,31 @@ class TransactionsToFireflySender
             throw new \Exception("Error in regular expression!\nMatch expression {$regex_match}\nReplace expression {$regex_replace}");
         }
 
+        // Get currency code from structured description (set by CAMT parser)
+        $structuredDesc = $transaction->getStructuredDescription();
+        $currencyCode = $structuredDesc['CURR'] ?? null;
+
+        // Build transaction array and filter out null values
+        $transactionData = array_filter([
+            'type' => $type,
+            'date' => $transaction->getValutaDate()->format('Y-m-d'),
+            'amount' => $amount,
+            'description' => $description,
+            'currency_code' => $currencyCode,
+            'source_name' => $source['name'] ?? null,
+            'source_id' => $source['id'] ?? null,
+            'source_iban' => $source['iban'] ?? null,
+            'destination_name' => $destination['name'] ?? null,
+            'destination_id' => $destination['id'] ?? null,
+            'destination_iban' => $destination['iban'] ?? null,
+            'sepa_ct_id' => $transaction->getEndToEndID() ?: null,
+            'notes' => $structuredDesc['ABWA'] ?? $destination['name'] ?? null,
+        ], fn($value) => $value !== null);
+
         return array(
             'apply_rules' => true,
             'error_if_duplicate_hash' => true,
-            'transactions' => array(
-                array(
-                    'type' => $type,
-                    'date' => $transaction->getValutaDate()->format('Y-m-d'),
-                    'amount' => $amount,
-                    'description' => $description,
-                    'source_name' => $source['name'] ?? null,
-                    'source_id' => $source['id'] ?? null,
-                    'source_iban' => $source['iban'] ?? null,
-                    'destination_name' => $destination['name'] ?? null,
-                    'destination_id' => $destination['id'] ?? null,
-                    'destination_iban' => $destination['iban'] ?? null,
-                    'sepa_ct_id' => $transaction->getEndToEndID() ?? null,
-                    'notes' => $transaction->getStructuredDescription()['ABWA'] ?? $destination['name'] ?? null,
-                )
-            )
+            'transactions' => array($transactionData)
         );
     }
 

@@ -32,9 +32,12 @@ function ChooseAccount()
     if ($list_accounts_handler->needs_tan()) {
         $list_accounts_handler->pose_and_render_tan_challenge();
     } else {
-        $bank_accounts            = $list_accounts_handler->get_finished_action()->getAccounts();
+        /** @var \Fhp\Action\GetSEPAAccounts $get_sepa_accounts_action */
+        $get_sepa_accounts_action = $list_accounts_handler->get_finished_action();
+        $bank_accounts            = $get_sepa_accounts_action->getAccounts();
         $firefly_accounts_request = new GetAccountsRequest($session->get('firefly_url'), $session->get('firefly_access_token'));
         $firefly_accounts_request->setType(GetAccountsRequest::ASSET);
+        /** @var \GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse $firefly_accounts */
         $firefly_accounts = $firefly_accounts_request->get();
 
         $requested_bank_index = -1;
