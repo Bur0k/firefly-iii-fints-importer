@@ -23,13 +23,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      -
         name: Build and push
         id: docker_build
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
           push: true
-          tags: benkl/firefly-iii-fints-importer:latest
+          tags: |
+            benkl/firefly-iii-fints-importer:latest
+            benkl/firefly-iii-fints-importer:${{ steps.date.outputs.date }}
           
       - uses: actions/checkout@v3
       - run: "sed -i 's/build: ./image: benkl\\/firefly-iii-fints-importer/g' docker-compose.yml"
