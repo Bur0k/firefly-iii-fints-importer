@@ -31,7 +31,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'current_balance' => '0',
                     'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
-            )),
+                )),
             1 => array(
                 'id'            => $this->firefly_account_id,
                 'attributes' => array(
@@ -43,7 +43,7 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'current_balance' => '0',
                     'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
-            )),
+                )),
             2 => array(
                 'id'            => $this->transfer_account_id,
                 'attributes' => array(
@@ -55,8 +55,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'current_balance' => '0',
                     'current_balance_date' => '2020-01-01T00:00:00+00:00',
                     'currency_code' => 'EUR',
-            )),
-    ));
+                )),
+        ));
     }
 
     public function test_get_iban()
@@ -88,13 +88,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'amount' => 3.14,
                     'description' => 'description',
                     'source_name' => 'source_name',
-                    'source_id' => null,
                     'source_iban' => $this->valid_iban,
-                    'destination_name' => null,
                     'destination_id' => $this->firefly_account_id,
-                    'destination_iban' => null,
-                    'sepa_ct_id' => '',
-                    'notes' => null,
                 )
             )
         );
@@ -125,13 +120,9 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'date' => '2020-06-01',
                     'amount' => 3.14,
                     'description' => 'description',
-                    'source_name' => null,
                     'source_id' => $this->firefly_account_id,
-                    'source_iban' => null,
                     'destination_name' => 'destination_name',
-                    'destination_id' => null,
                     'destination_iban' => $this->valid_iban,
-                    'sepa_ct_id' => '',
                     'notes' => 'bakery',
                 )
             )
@@ -163,14 +154,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'date' => '2020-06-01',
                     'amount' => 3.14,
                     'description' => 'description',
-                    'source_name' => null,
                     'source_id' => $this->transfer_account_id,
-                    'source_iban' => null,
-                    'destination_name' => null,
                     'destination_id' => $this->firefly_account_id,
-                    'destination_iban' => null,
-                    'sepa_ct_id' => '',
-                    'notes' => null,
                 )
             )
         );
@@ -201,14 +186,8 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'date' => '2020-06-01',
                     'amount' => 3.14,
                     'description' => 'description',
-                    'source_name' => null,
                     'source_id' => $this->firefly_account_id,
-                    'source_iban' => null,
-                    'destination_name' => null,
                     'destination_id' => $this->transfer_account_id,
-                    'destination_iban' => null,
-                    'sepa_ct_id' => '',
-                    'notes' => null,
                 )
             )
         );
@@ -253,13 +232,9 @@ final class TransactionsToFireflySenderTest extends TestCase
                     'date' => '2020-06-01',
                     'amount' => 3.14,
                     'description' => 'Example Store [LASTSCHRIFT / BELASTUNG | KARTE 000000000KDN-REF 000000 | Ref. XXXX/0000]',
-                    'source_name' => null,
                     'source_id' => $this->firefly_account_id,
-                    'source_iban' => null,
                     'destination_name' => 'destination_name',
-                    'destination_id' => null,
                     'destination_iban' => $this->valid_iban,
-                    'sepa_ct_id' => '',
                     'notes' => 'bakery',
                 )
             )
