@@ -97,6 +97,7 @@ class TransactionsToFireflySender
         }
 
         if($regex_match !== "" && $regex_replace !== "") {
+            $description = (string)($description ?? '');
             $description = preg_replace($regex_match, $regex_replace, $description);
         }
 
