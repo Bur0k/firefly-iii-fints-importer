@@ -109,6 +109,8 @@ class StatementOfAccountHelper
                         // Set counterparty account number (IBAN)
                         if ($relatedParty && $relatedParty->getAccount()) {
                             $transaction->setAccountNumber($relatedParty->getAccount()->getIdentification());
+                        } else {
+                            $transaction->setAccountNumber("");
                         }
 
                         // Set counterparty name
