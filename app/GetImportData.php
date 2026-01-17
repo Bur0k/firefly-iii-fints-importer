@@ -71,16 +71,16 @@ function GetImportData()
             } else {
                 Logger::info("Parsing CAMT XML format");
                 $camt_xml_array = $finished_action->getBookedXML();
+                Logger::trace("CAMT XML raw data received from bank:" . print_r($camt_xml_array, true));
 
                 Logger::trace("CAMT XML array count: " . count($camt_xml_array));
                 if (!empty($camt_xml_array) && isset($camt_xml_array[0])) {
                     Logger::trace("First CAMT XML length: " . strlen($camt_xml_array[0]));
                 }
 
-                $camt_xml = $camt_xml_array[0] ?? '';
-
-                if (!empty(trim($camt_xml))) {
-                    $transactions = \App\StatementOfAccountHelper::parse_camt_xml($camt_xml);
+                foreach ($camt_xml_array as $camt_xml) {
+                    $camt_transactions = \App\StatementOfAccountHelper::parse_camt_xml($camt_xml);
+                    $transactions = array_merge($transactions, $camt_transactions);
                 }
             }
 
@@ -117,6 +117,7 @@ function GetImportData()
     } catch (UnexpectedResponseException $e) {
         // Check if this is a "format not supported" error
         $message = $e->getMessage();
+        Logger::debug("Caught UnexpectedResponseException: " . $message);
 
         if (strpos($message, 'HICAZS') !== false && !$use_mt940_fallback) {
             // CAMT not supported, try MT940
