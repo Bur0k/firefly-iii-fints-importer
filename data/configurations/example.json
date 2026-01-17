@@ -13,6 +13,7 @@
   "description_regex_match": "/^(Übertrag \\/ Überweisung|Lastschrift \\/ Belastung)(.*)(END-TO-END-REF.*|Karte.*|KFN.*)(Ref\\..*)$/mi",
   "description_regex_replace": "$2 [$1 | $3 | $4]",
   "auto_submit_form_via_js": false,
+  "force_mt940": false,
   "choose_account_automation":
   {
     "bank_account_iban": "",

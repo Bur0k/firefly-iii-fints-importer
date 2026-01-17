@@ -60,6 +60,7 @@ function CollectData()
         $session->set('choose_account_to',       $configuration->choose_account_to);
         $session->set('description_regex_match', $configuration->description_regex_match);
         $session->set('description_regex_replace', $configuration->description_regex_replace);
+        $session->set('force_mt940',             $configuration->force_mt940);
 
         $fin_ts   = FinTsFactory::create_from_session($session);
         $tan_mode = FinTsFactory::get_tan_mode($fin_ts, $session);

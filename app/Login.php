@@ -52,6 +52,11 @@ function Login()
             $session->set('statement_format', 'camt'); // Default, let exception handling deal with it
         }
 
+        if ($session->get('force_mt940')) {
+            Logger::info("Forcing MT940 format as per configuration");
+            $session->set('statement_format', 'mt940');
+        }
+
         if ($automate_without_js)
         {
             $session->set('persistedFints', $fin_ts->persist());
