@@ -21,6 +21,7 @@ include 'Choose2FADevice.php';
 include 'Login.php';
 include 'ChooseAccount.php';
 include 'GetImportData.php';
+include 'StaleDialog.php';
 include 'RunImportBatched.php';
 
 use App\StepFunction;

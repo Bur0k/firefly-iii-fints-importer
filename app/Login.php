@@ -33,6 +33,10 @@ function Login()
         $request
     );
 
+    if ($login_handler->needs_relogin()) {
+        return handle_stale_dialog($twig);
+    }
+
     if ($login_handler->needs_tan()) {
         $login_handler->pose_and_render_tan_challenge();
     } else {

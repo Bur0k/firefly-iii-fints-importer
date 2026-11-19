@@ -1,0 +1,10 @@
+{% extends 'base.twig' %}
+{% block title %}Bank session recovery{% endblock %}
+{% block content %}
+<h1>Bank session recovery</h1>
+<p>{{ message }}</p>
+<form action="." method="post">
+    <input type="hidden" name="step" value="{{ next_step }}">
+    <button type="submit" class="btn btn-primary">Log in again</button>
+</form>
+{% endblock %}

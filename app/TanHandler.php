@@ -6,6 +6,7 @@ namespace App;
 
 use Fhp\BaseAction;
 use Fhp\FinTs;
+use Fhp\Protocol\ServerException;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Twig\Environment;
 
@@ -33,19 +34,66 @@ class TanHandler
 
     private function create_or_continue_action(): void
     {
-        if ($this->session->has($this->action_id)) {
-            $this->action = unserialize($this->session->get($this->action_id));
-            $this->session->remove($this->action_id);
-            if ($this->fin_ts->getSelectedTanMode()->isDecoupled()) {
-                if ($this->action->getTanRequest() != null && !$this->fin_ts->checkDecoupledSubmission($this->action)) {
-                    $this->action = ($this->create_action_lambda)();
+        $resuming_action = $this->session->has($this->action_id);
+        try {
+            if ($resuming_action) {
+                $this->action = unserialize($this->session->get($this->action_id));
+                $this->session->remove($this->action_id);
+                if ($this->fin_ts->getSelectedTanMode()->isDecoupled()) {
+                    if ($this->action->getTanRequest() != null && !$this->fin_ts->checkDecoupledSubmission($this->action)) {
+                        $resuming_action = false;
+                        $this->action = ($this->create_action_lambda)();
+                    }
+                } else {
+                    $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
                 }
             } else {
-                $this->fin_ts->submitTan($this->action, $this->request->request->get('tan'));
+                $this->action = ($this->create_action_lambda)();
             }
-        } else {
-            $this->action = ($this->create_action_lambda)();
+        } catch (ServerException $e) {
+            // A fresh login forgets the previous dialog, even if its snapshot is still saved.
+            $used_saved_dialog = $resuming_action
+                || ($this->action_id !== 'login-action' && $this->session->has('persistedFints'));
+            if (!$used_saved_dialog || !self::indicates_invalid_dialog($e)) {
+                throw $e;
+            }
+            // Restart authentication rather than replaying an action on a rejected dialog.
+            $this->needs_relogin = true;
+            $this->session->remove('persistedFints');
+            $this->session->remove('accounts');
+            $this->session->remove($this->action_id);
         }
+    }
+
+    /**
+     * Returns true if the saved dialog is invalid or its message counter is out of sync.
+     */
+    public function needs_relogin(): bool
+    {
+        return $this->needs_relogin;
+    }
+
+    /**
+     * Only global dialog errors qualify; 9120 can also report unrelated request errors.
+     */
+    private static function indicates_invalid_dialog(ServerException $e): bool
+    {
+        if ($e->indicatesBadLoginData() || $e->indicatesLocked() || $e->indicatesBadTan()) {
+            return false;
+        }
+        foreach ($e->getErrors() as $error) {
+            if ($error->referenceSegment !== null) {
+                continue;
+            }
+            if ($error->rueckmeldungscode === 9010) {
+                return true;
+            }
+            if ($error->rueckmeldungscode === 9120
+                && stripos($error->rueckmeldungstext, 'nicht die erwartete Nachrichtennummer') !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function needs_tan(): bool
@@ -90,6 +138,7 @@ class TanHandler
     }
 
     private $action;
+    private $needs_relogin = false;
     private $create_action_lambda;
     private $action_id;
     private $session;

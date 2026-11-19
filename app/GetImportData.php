@@ -56,6 +56,10 @@ function GetImportData()
             $request
         );
 
+        if ($soa_handler->needs_relogin()) {
+            return handle_stale_dialog($twig);
+        }
+
         if ($soa_handler->needs_tan()) {
             $soa_handler->pose_and_render_tan_challenge();
         } else {

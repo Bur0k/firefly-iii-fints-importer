@@ -29,6 +29,10 @@ function ChooseAccount()
         $current_step,
         $request
     );
+
+    if ($list_accounts_handler->needs_relogin()) {
+        return handle_stale_dialog($twig);
+    }
     if ($list_accounts_handler->needs_tan()) {
         $list_accounts_handler->pose_and_render_tan_challenge();
     } else {
